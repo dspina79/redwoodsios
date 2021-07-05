@@ -121,7 +121,8 @@ extension NewClaimViewController {
 		let associationRequest = RestClient.shared.compositeRequestForCreatingAssociations(fromContactIDs: contactIDs, toCaseID: caseID)
 		RestClient.shared.sendCompositeRequest(associationRequest, onFailure: handleError) { _ in
 			SalesforceLogger.d(type(of: self), message: "Completed creating \(contactIDs.count) case contact record(s). Optionally uploading map image as attachment.")
-			self.unwindToClaims(forCaseID: caseID)
+			//self.unwindToClaims(forCaseID: caseID)
+			self.uploadPhotos(forCaseID: caseID)
 		}
 	}
 
@@ -178,6 +179,8 @@ extension NewClaimViewController {
 				SalesforceLogger.d(type(of: self), message: "Completed upload of photo \(index + 1) of \(self.selectedImages.count).")
 			}
 		}
+		
+		self.uploadAudio(forCaseID: caseID)
 	}
 
 	/// Uploads the recorded audio as an attachment.
@@ -189,6 +192,7 @@ extension NewClaimViewController {
 			let attachmentRequest = RestClient.shared.requestForCreatingAudioAttachment(from: audioData, relatingToCaseID: caseID)
 			RestClient.shared.send(request: attachmentRequest, onFailure: handleError) { _, _ in
 				SalesforceLogger.d(type(of: self), message: "Completed uploading audio file. Transaction complete!")
+				self.unwindToClaims(forCaseID: caseID)
 			}
 		} else {
 			// Complete upload if there is no audio file.
