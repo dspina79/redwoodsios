@@ -122,7 +122,7 @@ extension NewClaimViewController {
 		RestClient.shared.sendCompositeRequest(associationRequest, onFailure: handleError) { _ in
 			SalesforceLogger.d(type(of: self), message: "Completed creating \(contactIDs.count) case contact record(s). Optionally uploading map image as attachment.")
 			//self.unwindToClaims(forCaseID: caseID)
-			self.uploadPhotos(forCaseID: caseID)
+			self.uploadMapImage(forCaseID: caseID)
 		}
 	}
 
@@ -158,8 +158,15 @@ extension NewClaimViewController {
 			pinImage?.draw(at: point)
 
 			let mapImage = UIGraphicsGetImageFromCurrentImageContext()!
+						   let attachmentRequest =
+			RestClient.shared.requestForCreatingImageAttachment(from: mapImage, relatingToCaseID: caseID, fileName: "MapSnapshot.png")
 			
-			//Insert your attachmentRequest here.
+			RestClient.shared.send(request: attachmentRequest, onFailure:
+			self.handleError) { _, _ in
+								   SalesforceLogger.d(type(of: self), message:
+			"Completed uploading map image. Now uploading photos.")
+								  self.uploadPhotos (forCaseID: caseID)
+			}
 			
 			//End area for Attachment Request.
 			UIGraphicsEndImageContext()
